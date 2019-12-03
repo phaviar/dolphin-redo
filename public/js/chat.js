@@ -39,9 +39,9 @@ drop.src = "/assets/drop.mp3";
 axios.defaults.headers.common["Authorization"] = token;
 var messagebody = document.getElementsByClassName("messages")[0]; // This is used to control the scroll of the messages.
 
-// if (location.protocol != 'https:')
+// if (location.protocol != "https:")
 // {
-//  location.href = 'https:' + window.location.href.substring(window.location.protocol.length);
+//  location.href = "https:" + window.location.href.substring(window.location.protocol.length);
 // }
 // let video = document.getElementById("call");
 
@@ -159,7 +159,7 @@ function init () {
     });
 }
 (async () => {
-    messages = await init(); // This initalizes the message history & the logged in user's info.
+    messages = await init(); // This initalizes the message history & the logged in user"s info.
     const peer = new Peer(id, { host: window.location.host, port: 9000, path: "/peer" });
 
     const result = await fetchPanel();
@@ -311,6 +311,13 @@ function init () {
             scroll () {
                 document.querySelector("#test > div").scrollTop = 999999;
             },
+            showExtras (msg) {
+                const message = messages[messages.indexOf(messages.find(m => m.id === msg))]
+                const lastMessage = messages[messages.indexOf(messages.find(m => m.id === msg)) - 1]
+                if (!lastMessage) return true
+                if ((message.author === lastMessage.author) === false) return true
+                return (message.timestamp - lastMessage.timestamp > 60000)
+            },
             call: function (user) {
                 navigator.getUserMedia({ video: false, audio: true },
                     function (stream) {
@@ -320,7 +327,7 @@ function init () {
                             var audio = document.getElementById("call");
                             audio.srcObject = remoteStream;
                         });
-                        call.on('error', function () { console.log('sadly'); });
+                        call.on("error", function () { console.log("sadly"); });
                         call.on("close", function () {
                             voicechat.splice(
                                 voicechat.indexOf(voicechat.find(p => p.id === id)),
@@ -400,7 +407,7 @@ function init () {
     var input_message = document.getElementById("type-area");
 
     input_message.addEventListener("keypress", event => {
-        // Check if the user doesn't mean new line and send.
+        // Check if the user doesn"t mean new line and send.
         if (event.keyCode == 13 && !event.shiftKey) {
             if (input_message.value.trim().length > 0) {
                 socket.emit("message_create", {
@@ -408,7 +415,7 @@ function init () {
                     content: input_message.value
                 });
                 input_message.value = "";
-                // Un focus the message send textbox, don't worry we auto refocus it when they start typing again
+                // Un focus the message send textbox, don"t worry we auto refocus it when they start typing again
                 input_message.blur();
             } else {
                 input_message.blur();

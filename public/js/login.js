@@ -9,7 +9,7 @@ window.onload = function () {
     if (token) window.location.replace("/chat");
 };
 document.getElementById('body').addEventListener('keypress', event => {
-    if (event.keyCode == 13) {
+    if (event.keyCode === 13) {
         onFormSubmit()
     }
 });

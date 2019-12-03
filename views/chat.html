@@ -5,19 +5,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Dolphin</title>
     <meta name="theme-color" content="#1787FF">
+
+    <title>Dolphin</title>
+
     <link href="https://fonts.googleapis.com/css?family=Noto+Sans+TC" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.2/animate.min.css">
     <link rel="stylesheet" href="/css/chat.css">
+
     <script src="https://hammerjs.github.io/dist/hammer.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/peerjs@0.3.20/dist/peer.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.3/socket.io.js"></script>
     <script src="https://unpkg.com/marked@0.5.2/lib/marked.js"></script>
-    <script src="https://momentjs.com/downloads/moment.js"></script>
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
-    <script src="https://cdn.plyr.io/3.5.6/plyr.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/peerjs@0.3.20/dist/peer.min.js"></script>
+    <script src="https://momentjs.com/downloads/moment.js"></script>
 
     <script src="/js/socket.js" async></script>
     <script src="/js/chat.js" async></script>
@@ -80,15 +82,15 @@
             <div class="center-panel" id="test" v-tap="onTap">
                 <!-- <div class="banner animated slideInDown">This a banner</div> -->
                 <div class="messages">
-                    <article v-for="message in messages" v-bind:message-id="message.id" class="message">
-                        <figure class="message-avatar">
+                    <article v-for="message in messages" v-bind:message-id="message.id" class="message" v-bind:class="{ 'no-extra': !showExtras(message.id) }">
+                        <figure class="message-avatar" v-if="showExtras(message.id)">
                             <p class="is-64x64">
                                 <img class="is-rounded" v-bind:src="getImageUrl(message.author)" @error="imageUrlAlt">
                             </p>
                         </figure>
                         <div class="message-content">
-                            <div class="message-username">{{ message.ausername }}</div>
-                            <time class="timestamp" v-text="formatDate(message.timestamp)"></time>
+                            <div class="message-username" v-if="showExtras(message.id)">{{ message.ausername }}</div>
+                            <time class="timestamp" v-if="showExtras(message.id)" v-text="formatDate(message.timestamp)"></time>
                             <div class="message-text" v-if="message.content" v-html="compiledMarkdown(message.content)"></div>
                             <br v-if="!message.content">
                             <iframe class="message-video" v-if="/(http\:\/\/)?(www\.youtube\.com|youtu\.?be)\/.+$/.test(message.content) && !message.image" width="560" height="315" v-bind:src="'http://www.youtube-nocookie.com/embed/' +  message.content.split('/').pop().replace('watch?v=', '')" frameborder="0" allow="accelerometer; autoplay; gyroscope; picture-in-picture" allowfullscreen></iframe>

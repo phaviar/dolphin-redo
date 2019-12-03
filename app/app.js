@@ -1,6 +1,7 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const fileUpload = require("express-fileupload");
+const fs = require("fs");
 const dotenv = require('dotenv');
 
 dotenv.config();
@@ -15,7 +16,6 @@ const httpServer = require("http").Server(app);
 const httpsServer = (prod) ? require("https").Server(credentials, app) : null;
 const io = (prod) ? require("socket.io")(httpsServer) : require("socket.io")(httpServer);
 
-const fs = require("fs");
 const PeerServer = require('peer').PeerServer;
 const path = require("path");
 

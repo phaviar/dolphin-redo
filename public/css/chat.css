@@ -351,15 +351,25 @@ main {
 }
 
 /* ----message---- */
+
 .message {
     display: flex;
     background-color: rgba(0, 0, 0, 0);
-    margin-bottom: 47px;
+    margin-top: 47px;
     margin-left: 60px;
+}
+
+.no-extra {
+    margin-top: 0px;
+    margin-left: 133px;
 }
 
 .messages>article:nth-child(1) {
     margin-top: 67px;
+}
+
+.messages>article:last-child {
+    margin-bottom: 47px;
 }
 
 .message-content {
