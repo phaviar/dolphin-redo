@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Dolphin</title>
+    <meta name="theme-color" content="#1787FF">
+    <link href="https://fonts.googleapis.com/css?family=Noto+Sans+TC" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.2/animate.min.css">
+    <link rel="stylesheet" href="/css/chat.css">
+    <script src="https://hammerjs.github.io/dist/hammer.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.3/socket.io.js"></script>
+    <script src="https://unpkg.com/marked@0.5.2/lib/marked.js"></script>
+    <script src="https://momentjs.com/downloads/moment.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.plyr.io/3.5.6/plyr.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/peerjs@0.3.20/dist/peer.min.js"></script>
+
+    <script src="/js/socket.js" async></script>
+    <script src="/js/chat.js" async></script>
+
+</head>
+
+<body>
+    <main id="app">
+        <div class="modal-content animated zoomIn faster none">
+            <div class="caller">
+                <p class="is-128x128">
+                    <img class="is-rounded" v-bind:src="getImageUrl(id)" @error="imageUrlAlt" v-on:click="call(user.id)">
+                </p>
+                <h3>Username</h3>
+                <h4>is calling you</h4>
+            </div>
+            <button class="answer-call">Answer</button>
+            <button class="decline-call">Decline</button>
+        </div>
+        <div class="modal-darken animated fadeIn faster none" @click="closeModal"></div>
+        <div class="window-title-bar">
+            <h3 class="window-name">DOLPHIN</h3>
+            <!-- <hr class="bar-divider"> -->
+            <!-- <h3 class="channel-name">channel</h3> -->
+        </div>
+
+        <div class="wrap">
+            <div class="left-panel animated faster">
+                <h3 class="friends-name">Online</h3>
+                <div class="divider"></div>
+                <div class="friends">
+                    <div v-for="user in online" class="friend">
+                        <p class="is-64x64">
+                            <img class="is-rounded" v-bind:src="getImageUrl(user.id)" @error="imageUrlAlt" v-on:click="call(user.id)">
+                        </p>
+                        <h3>{{ user.name }}</h3>
+                    </div>
+                </div>
+                <h3 class="friends-name">Offline</h3>
+                <div class="divider"></div>
+                <div class="friends">
+                    <div v-for="user in offline" class="friend">
+                        <p class="is-64x64">
+                            <img class="is-rounded" v-bind:src="getImageUrl(user.id)" @error="imageUrlAlt">
+                        </p>
+                        <h3>{{ user.name }}</h3>
+                    </div>
+                </div>
+                <h3 class="friends-name">Voice Chat</h3>
+                <div class="divider"></div>
+                <div class="friends">
+                    <div v-for="user in voicechat" class="friend">
+                        <p class="is-64x64">
+                            <img class="is-rounded" v-bind:src="getImageUrl(user.id)" @error="imageUrlAlt">
+                        </p>
+                        <h3>{{ user.name }}</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="center-panel" id="test" v-tap="onTap">
+                <!-- <div class="banner animated slideInDown">This a banner</div> -->
+                <div class="messages">
+                    <article v-for="message in messages" v-bind:message-id="message.id" class="message">
+                        <figure class="message-avatar">
+                            <p class="is-64x64">
+                                <img class="is-rounded" v-bind:src="getImageUrl(message.author)" @error="imageUrlAlt">
+                            </p>
+                        </figure>
+                        <div class="message-content">
+                            <div class="message-username">{{ message.ausername }}</div>
+                            <time class="timestamp" v-text="formatDate(message.timestamp)"></time>
+                            <div class="message-text" v-if="message.content" v-html="compiledMarkdown(message.content)"></div>
+                            <br v-if="!message.content">
+                            <iframe class="message-video" v-if="/(http\:\/\/)?(www\.youtube\.com|youtu\.?be)\/.+$/.test(message.content) && !message.image" width="560" height="315" v-bind:src="'http://www.youtube-nocookie.com/embed/' +  message.content.split('/').pop().replace('watch?v=', '')" frameborder="0" allow="accelerometer; autoplay; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                            <img v-if="message.image" v-bind:src="'/assets/messages/' + message.image + '.png'" @load="scroll" class="message-image">
+                        </div>
+                    </article>
+                </div>
+                <div class="area-divider"></div>
+                <div class="area-container">
+                    <form ref='uploadForm' id='uploadForm' action='http://localhost/api/uploadimages' method='post' encType="multipart/form-data">
+                        <input type="file" id="image-up" required accept="image/png, image/jpeg" ref="file" @change="uploadImg" />
+                        <svg @click="uploadPromptImg" aria-hidden="true" data-prefix="fas" data-icon="plus-circle" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" data-fa-i2svg="" class="svg-inline--fa fa-plus-circle fa-w-16">
+                            <path fill="currentColor" d="M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8zm144 276c0 6.6-5.4 12-12 12h-92v92c0 6.6-5.4 12-12 12h-56c-6.6 0-12-5.4-12-12v-92h-92c-6.6 0-12-5.4-12-12v-56c0-6.6 5.4-12 12-12h92v-92c0-6.6 5.4-12 12-12h56c6.6 0 12 5.4 12 12v92h92c6.6 0 12 5.4 12 12v56z"></path>
+                        </svg>
+                        <textarea type="text" id="type-area" class="type-area" placeholder="Send a message"></textarea>
+                </div>
+            </div>
+            <div class="right-panel animated faster">
+                <article class="self">
+
+                    <div class="self-text">
+                        <div class="self-username">{{ username }}</div>
+                        <div class="self-status">
+                            online
+                        </div>
+                    </div>
+                    <figure class="self-avatar is-64x64">
+                        <form ref='uploadForm' id='uploadForm' action='http://localhost/api/uploadavatar' method='post' encType="multipart/form-data">
+                            <input type="file" id="avatar-up" required accept="image/png, image/jpeg" ref="file" @change="upload" />
+                            <img class="avatar-img is-rounded" id="self-avatar" @click="uploadPrompt" v-bind:src="getImageUrl(id)" @error="imageUrlAlt">
+                        </form>
+                    </figure>
+                </article>
+                <audio id="call" autoplay></audio>
+            </div>
+        </div>
+    </main>
+
+</body>
+
+</html>
