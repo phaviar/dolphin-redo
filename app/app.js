@@ -29,7 +29,7 @@ const validate = require("./validation");
 const logger = require("./logger.js");
 const auth = require("./auth");
 const socketHandler = require("./socket.js");
-const port = 80;
+const port = 3000;
 const maxImageSize = 52428800;
 
 // API
